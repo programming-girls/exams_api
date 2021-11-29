@@ -1,4 +1,5 @@
 from manage import app, db
+from flask import request, jsonify, abort
 
 from src.exam.models.model import Exam, Subject, Question, SubQuestion, Answer, Image
 
@@ -6,7 +7,6 @@ from src.exam.models.model import Exam, Subject, Question, SubQuestion, Answer, 
 from src.orc_engine.ocr_server import ocr_core, ocr
 from src.exam.views.text_marking_scheme import text_marking_scheme
 from src.exam.views.choice_marking_scheme import choice_marking_scheme
-from src.users.views.admin_views import ad
 
 
 
@@ -14,7 +14,6 @@ from src.users.views.admin_views import ad
 app.register_blueprint(ocr)
 app.register_blueprint(text_marking_scheme)
 app.register_blueprint(choice_marking_scheme)
-app.register_blueprint(ad)
 
 
 with app.app_context():

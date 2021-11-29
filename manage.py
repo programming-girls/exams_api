@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from ariadne import QueryType
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
@@ -12,5 +12,5 @@ app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
 SECRET_KEY = os.urandom(32)
 app.config['SECRET_KEY'] = SECRET_KEY
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+query = QueryType()
 
