@@ -5,7 +5,7 @@ from flask_admin.contrib.sqla import ModelView
 from manage import app, db
 
 
-from src.exam.models.model import Exam, Subject, Question, SubQuestion, Answer, Image
+from src.models.exam_model import Exam, Subject, Question, SubQuestion, Answer, Image
 
 ad = Blueprint('ad', __name__)
 

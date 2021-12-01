@@ -49,6 +49,7 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ques = db.Column(db.String(), nullable=False)
     ques_score = db.Column(db.Integer, nullable=False)
+    image = db.relationship('Image', secondary=Question_Image, backref=db.backref('Question', lazy='dynamic'),lazy='dynamic')
     subject = db.relationship('Subject', secondary=Subject_Question, backref=db.backref('Question', lazy='dynamic'),lazy='dynamic')
 
     def __repr__(self):
@@ -58,6 +59,8 @@ class SubQuestion(db.Model):
     __tablename__ = 'subquestion'
     id = db.Column(db.Integer, primary_key=True)
     subques = db.Column(db.String(), nullable=False)
+    subques_score = db.Column(db.Integer, nullable=False)
+    sub_ques_ans_id = db.relationship('Answer', db.ForeignKey('Answer'),backref=db.backref('SubQuestion', lazy='dynamic'),lazy='dynamic')
     question = db.relationship('Question', secondary=Question_SubQuestion, backref=db.backref('SubQuestion', lazy='dynamic'),lazy='dynamic')
 
     def __repr__(self):
@@ -69,7 +72,6 @@ class Answer(db.Model):
     ans = db.Column(db.String(), nullable=False)
     question = db.relationship('Question', secondary=Question_Answer, backref=db.backref('Answer', lazy='dynamic'),lazy='dynamic')
 
-
     def __repr__(self):
         return "<Answer ID: {}>".format(self.id)
 
@@ -77,6 +79,7 @@ class Image(db.Model):
     __tablename__ = 'image'
     id = db.Column(db.Integer, primary_key=True)
     images_url = db.Column(db.String(), nullable=False)
+    image_caption = db.Column(db.String(), nullable=True)
     question = db.relationship('Question', secondary=Question_Image, backref=db.backref('Image', lazy='dynamic'),lazy='dynamic')
 
     def __repr__(self):

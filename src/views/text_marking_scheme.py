@@ -1,7 +1,6 @@
 from os import abort
 from thefuzz import fuzz
 from flask import Blueprint,request, jsonify
-from manage import app
 
 
 text_marking_scheme = Blueprint('text_marking_scheme', __name__)
