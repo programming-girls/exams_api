@@ -27,10 +27,18 @@ def get_answer():
     if not data:
         return jsonify({"message": "add data to the body in json format"})
 
-    
-    sa = data['student_choice']
+    sc = data['student_choice']
+
+    if not sc:
+        return jsonify({"message": "add student choice to the body in json format"})
+
     qi = data['question_id']
-    cms = Choice_marking_scheme(sa, qi)
+
+    if not qi:
+        return jsonify({"message": "add question id to the body in json format"})
+    
+    
+    cms = Choice_marking_scheme(sc, qi)
 
     return jsonify({"score": cms.compare_choice()})
 

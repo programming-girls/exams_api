@@ -12,7 +12,7 @@ answer_keys = ['ans','ques_id']
 sub_question_keys = ['sub_question', 'sub_ques_score', 'sub_ques_ans_id']
 
 @exam.route('/title', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def _Exam(id=None):
+def _Exam():
     if request.method == 'POST':
         '''
         this is hashed because you can have 2019 KCSE and 2019 KCPE, 2019 Mock
@@ -40,12 +40,14 @@ def _Exam(id=None):
     
 
     if request.method == 'GET':
+        id = request.args.get('id')
         if not id:
             res = Exam.query.all()
         res = Exam.query.get(id).first()
         return Response(res)
 
     if request.method == 'PUT':
+        id = request.args.get('id')
         if not id:
             return Response('No id provided')
         if not request.json:
@@ -58,6 +60,7 @@ def _Exam(id=None):
         return Response('Exam title updated sucesfully')
         
     if request.method == 'DELETE':
+        id = request.args.get('id')
         if not id:
             return Response('Please provide an id')
         res = Exam.query.get(id)
@@ -74,7 +77,7 @@ def _Search():
     
 
 @exam.route('/image', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def _Images(id):
+def _Images():
     if request.method == 'POST':
         url = request.form['image_url'] 
         caption = request.form['caption']
@@ -84,12 +87,14 @@ def _Images(id):
         return Response('Image created sucesfully')
 
     if request.method == 'GET':
+        id = request.args.get('id')
         if not id:
             res = Image.query.all()
         res = Image.query.get(id)
         return Response(res)
 
     if request.method == 'PUT':
+        id = request.args.get('id')
         if not id:
             return Response('No id provided')
         if not request.form:
@@ -102,6 +107,7 @@ def _Images(id):
         return Response('Image updated sucesfully')
 
     if request.method == 'DELETE':
+        id = request.args.get('id')
         if not id:
             return Response('Please provide an id')
         res = Image.query.get(id)
@@ -110,23 +116,42 @@ def _Images(id):
         return Response('Image deleted sucesfully')
 
 @exam.route('/question', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def _Questions(id):
+def _Questions():
     if request.method == 'POST':
-        ques = request.form['question'] 
-        question_score = request.form['question_score']
-        image_id = request.form['image_id'] 
+        data =request.json
+
+        if not data:
+            return Response(status=400, response='No data provided')
+
+        ques = data['question'] 
+
+        if not ques:
+            return Response(status=400, response='Question is required')
+
+        question_score = data['question_score']
+
+        if not question_score:
+            return Response(status=400, response='Question score is required')
+
+        image_id = data['image_id'] 
+
+        if not image_id:
+            image_id = None
+
         ques = Question(ques=ques, ques_score=question_score,image=image_id)
         db.session.add(ques)
         db.session.commit()
         return Response('Question created sucesfully')
 
     if request.method == 'GET':
+        id = request.args.get('id')
         if not id:
             res = Question.query.all()
         res = Question.query.get(id)
         return Response(res)
 
     if request.method == 'PUT':
+        id = request.args.get('id')
         if not id:
             return Response('No id provided')
         if not request.form:
@@ -139,6 +164,7 @@ def _Questions(id):
         return Response('Question updated sucesfully')
     
     if request.method == 'DELETE':
+        id = request.args.get('id')
         if not id:
             return Response('Please provide an id')
         res = Question.query.get(id)
@@ -148,23 +174,38 @@ def _Questions(id):
 
 
 
-@exam.route('/questions', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def _Answer(id):
+@exam.route('/answer', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def _Answer():
     if request.method == 'POST':
-        ans = request.form['answer'] 
-        question_id = request.form['question_id'] 
+
+        data =request.json
+
+        if not data:
+            return Response(status=400, response='No data provided')
+
+        ans = data['answer'] 
+
+        if not ans:
+            return Response(status=400, response='Answer is required')
+        question_id = data['question_id'] 
+
+        if not question_id:
+            return Response(status=400, response='Question id is required')
+            
         ans = Answer(ans=ans, question=question_id)
         db.session.add(ans)
         db.session.commit()
         return Response('Answer created sucesfully')
 
     if request.method == 'GET':
+        id = request.args.get('id')
         if not id:
             res = Answer.query.all()
         res = Answer.query.get(id)
         return Response(res)
 
     if request.method == 'PUT':
+        id = request.args.get('id')
         if not id:
             return Response('No id provided')
         if not request.form:
@@ -177,6 +218,7 @@ def _Answer(id):
         return Response('Answer updated sucesfully')
     
     if request.method == 'DELETE':
+        id = request.args.get('id')
         if not id:
             return Response('Please provide an id')
         res = Answer.query.get(id)
@@ -185,12 +227,27 @@ def _Answer(id):
         return Response('Answer deleted sucesfully')
 
 @exam.route('/subquestion', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def _Subquestion(id):
+def _Subquestion(id=None):
+    data = request.json
+    if not data:
+        return Response('No data provided', status=400)
+
     if request.method == 'POST':
-        sub_ques = request.form['sub_question'] 
-        ques_id = request.form['ques_id'] 
-        score = request.form['score']
-        ans = request.form['ans']
+
+        sub_ques = data['sub_question'] 
+        ques_id = data['ques_id'] 
+        score = data['score']
+        ans = data['ans']
+
+        if not sub_ques:
+            return Response('No sub question provided')
+        if not ques_id:
+            return Response('No question id provided')
+        if not score:
+            return Response('No score provided')
+        if not ans:
+            return Response('No answer provided')
+
         sub_ques = SubQuestion(sub_ques=sub_ques, question=ques_id, subques_score=score, sub_ques_ans_id=ans)
         db.session.add(sub_ques)
         db.session.commit()

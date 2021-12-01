@@ -1,29 +1,39 @@
 from os import abort
 from thefuzz import fuzz
 from flask import Blueprint,request, jsonify
+from src.models.exam_model import Question_Answer, Question
 
 
 text_marking_scheme = Blueprint('text_marking_scheme', __name__)
 
 class Text_marking_scheme:
-    def __init__(self, student_answer: str, correct_answer: str, question_score: int) -> None:
+    def __init__(self, student_answer: str, question_id: int) -> None:
         self.student_answer = student_answer
-        self.correct_answer = correct_answer
-        self.question_score = question_score
+        self.question_id = question_id
+
+    def get_correct_answer(self) -> str:
+        ans = Question_Answer.query.filter_by(question_id=self.question_id).first()
+        return ans.answer
+
+    def question_score(self) -> int:
+        score = Question.query.filter_by(question_id=self.question_id).first()
+        return score.score
     
 
     def compare_answer(self) -> int:
-        score = fuzz.partial_token_set_ratio(self.student_answer, self.correct_answer)
+        correct_answer = self.get_correct_answer()
+        score = fuzz.partial_token_set_ratio(self.student_answer, correct_answer)
         return score
 
     def get_score(self) ->int:
 
         res = 0
         fuzz_score = self.compare_answer()
+        question_score = self.question_score()
         if fuzz_score <= 50:
             res = 0
         else:
-            res = int(fuzz_score * self.question_score) // 100
+            res = int(fuzz_score * question_score) // 100
 
         return res
 
@@ -36,9 +46,8 @@ def get_answer():
 
     
     sa = data['student_answer']
-    ca = data['correct_answer']
-    qs = data['question_score']
-    tms = Text_marking_scheme(sa, ca, qs)
+    qi = data['question_id']
+    tms = Text_marking_scheme(sa, qi)
 
     return jsonify({"score": tms.get_score()})
 
