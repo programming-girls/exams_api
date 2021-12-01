@@ -1,5 +1,5 @@
 from flask import Blueprint,request, jsonify
-from src.models.exam_model import Answer, Question
+from src.models.exam_model import Answer, Question, Question_Answer
 
 
 choice_marking_scheme = Blueprint('choice_marking_scheme', __name__)
@@ -10,7 +10,7 @@ class Choice_marking_scheme:
         self.question_id = question_id
 
     def get_answer_from_db(self) -> str:
-        ans = Answer.query.filter(Answer.question.any(id= self.question_id )).first()
+        ans = Question_Answer.query.filter(question_id = self.question_id ).first()
         return ans
 
     def compare_choice(self) ->bool:
