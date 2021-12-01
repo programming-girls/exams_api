@@ -30,6 +30,7 @@ class Exam(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(), nullable=False)
     year = db.Column(db.String(), nullable=False)
+    exam_hash = db.Column(db.String(), nullable=False, unique=True)
 
     def __repr__(self):
         return "<Exam ID: {}>".format(self.id)
@@ -49,7 +50,6 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ques = db.Column(db.String(), nullable=False)
     ques_score = db.Column(db.Integer, nullable=False)
-    image = db.relationship('Image', secondary=Question_Image, backref=db.backref('Question', lazy='dynamic'),lazy='dynamic')
     subject = db.relationship('Subject', secondary=Subject_Question, backref=db.backref('Question', lazy='dynamic'),lazy='dynamic')
 
     def __repr__(self):
@@ -60,7 +60,7 @@ class SubQuestion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     subques = db.Column(db.String(), nullable=False)
     subques_score = db.Column(db.Integer, nullable=False)
-    sub_ques_ans_id = db.relationship('Answer', db.ForeignKey('Answer'),backref=db.backref('SubQuestion', lazy='dynamic'),lazy='dynamic')
+    sub_ques_ans_id = db.Column(db.Integer, db.ForeignKey("Answer.id"))
     question = db.relationship('Question', secondary=Question_SubQuestion, backref=db.backref('SubQuestion', lazy='dynamic'),lazy='dynamic')
 
     def __repr__(self):
@@ -78,7 +78,7 @@ class Answer(db.Model):
 class Image(db.Model):
     __tablename__ = 'image'
     id = db.Column(db.Integer, primary_key=True)
-    images_url = db.Column(db.String(), nullable=False)
+    images_url = db.Column(db.String(), nullable=False, unique=True)
     image_caption = db.Column(db.String(), nullable=True)
     question = db.relationship('Question', secondary=Question_Image, backref=db.backref('Image', lazy='dynamic'),lazy='dynamic')
 

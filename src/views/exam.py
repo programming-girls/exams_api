@@ -1,26 +1,43 @@
+import hashlib
 from manage import db
 from flask import Blueprint, Response, request
-from src.models.exam_model import Exam, Questions, Answers, Images, SubQuestion  
+from src.models.exam_model import Exam, Question, Answer, Image, SubQuestion  
 
 exam = Blueprint('exam', __name__)
 
-exam_keys = ['id', 'title', 'year', 'topic', 'sub_topic']
-image_keys = ['id', 'image_url', 'image_caption']
-question_keys = ['id', 'question', 'ques_score', 'image_id']
-answer_keys = ['id', 'ans','ques_id']
-sub_question_keys = ['id', 'sub_question', 'sub_ques_score', 'sub_ques_ans_id']
+exam_keys = ['title', 'year']
+image_keys = ['image_url', 'image_caption']
+question_keys = ['question', 'ques_score', 'image_id']
+answer_keys = ['ans','ques_id']
+sub_question_keys = ['sub_question', 'sub_ques_score', 'sub_ques_ans_id']
 
 @exam.route('/title', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def _Exam(id=None):
     if request.method == 'POST':
-        title = request.form['title'] 
-        year = request.form['year'] 
-        topic = request.form['topic'] 
-        sub_topic = request.form['sub_topic'] 
-        exam = Exam(title = title, yeat = year, topic = topic, sub_topic = sub_topic)
+        '''
+        this is hashed because you can have 2019 KCSE and 2019 KCPE, 2019 Mock
+        but never duplicates, even if it is in lowercase
+        '''
+        if not request.json:
+            return Response(status=400)
+        title = request.json.get('title')
+        if not title:
+            return Response(status=400, response='Title is required')
+        year = request.json.get('year')
+        if not year:
+            return Response(status=400, response='year is required')
+        string= title.lower() + year
+        hash_object = hashlib.md5(string.encode())
+
+        res = Exam.query.filter_by(exam_hash=hash_object.hexdigest()).first()
+        if res:
+            return Response(status=400, response='Exam already exists')
+
+        exam = Exam( title=title, year=year, exam_hash=hash_object.hexdigest())
         db.session.add(exam)
         db.session.commit()
-        return Response('Exam title created sucesfully')
+        return Response(status=201, mimetype='application/json')
+    
 
     if request.method == 'GET':
         if not id:
@@ -31,7 +48,7 @@ def _Exam(id=None):
     if request.method == 'PUT':
         if not id:
             return Response('No id provided')
-        if not request.form:
+        if not request.json:
             return Response('No data provided')
         res = Exam.query.get(id)
         for key in exam_keys:
@@ -61,15 +78,15 @@ def _Images(id):
     if request.method == 'POST':
         url = request.form['image_url'] 
         caption = request.form['caption']
-        image = Images(url=url, image_caption=caption)
+        image = Image(url=url, image_caption=caption)
         db.session.add(image)
         db.session.commit()
         return Response('Image created sucesfully')
 
     if request.method == 'GET':
         if not id:
-            res = Images.query.all()
-        res = Images.query.get(id)
+            res = Image.query.all()
+        res = Image.query.get(id)
         return Response(res)
 
     if request.method == 'PUT':
@@ -77,7 +94,7 @@ def _Images(id):
             return Response('No id provided')
         if not request.form:
             return Response('No data provided')
-        res = Images.query.get(id)
+        res = Image.query.get(id)
         for key in image_keys:
             if key in request.form:
                 setattr(res, key, request.form[key])
@@ -87,7 +104,7 @@ def _Images(id):
     if request.method == 'DELETE':
         if not id:
             return Response('Please provide an id')
-        res = Images.query.get(id)
+        res = Image.query.get(id)
         db.session.delete(res)
         db.session.commit()
         return Response('Image deleted sucesfully')
@@ -98,15 +115,15 @@ def _Questions(id):
         ques = request.form['question'] 
         question_score = request.form['question_score']
         image_id = request.form['image_id'] 
-        ques = Questions(ques=ques, ques_score=question_score,image=image_id)
+        ques = Question(ques=ques, ques_score=question_score,image=image_id)
         db.session.add(ques)
         db.session.commit()
         return Response('Question created sucesfully')
 
     if request.method == 'GET':
         if not id:
-            res = Questions.query.all()
-        res = Questions.query.get(id)
+            res = Question.query.all()
+        res = Question.query.get(id)
         return Response(res)
 
     if request.method == 'PUT':
@@ -114,7 +131,7 @@ def _Questions(id):
             return Response('No id provided')
         if not request.form:
             return Response('No data provided')
-        res = Questions.query.get(id)
+        res = Question.query.get(id)
         for key in question_keys:
             if key in request.form:
                 setattr(res, key, request.form[key])
@@ -124,7 +141,7 @@ def _Questions(id):
     if request.method == 'DELETE':
         if not id:
             return Response('Please provide an id')
-        res = Questions.query.get(id)
+        res = Question.query.get(id)
         db.session.delete(res)
         db.session.commit()
         return Response('Question deleted sucesfully')
@@ -136,15 +153,15 @@ def _Answer(id):
     if request.method == 'POST':
         ans = request.form['answer'] 
         question_id = request.form['question_id'] 
-        ans = Answers(ans=ans, question=question_id)
+        ans = Answer(ans=ans, question=question_id)
         db.session.add(ans)
         db.session.commit()
         return Response('Answer created sucesfully')
 
     if request.method == 'GET':
         if not id:
-            res = Answers.query.all()
-        res = Answers.query.get(id)
+            res = Answer.query.all()
+        res = Answer.query.get(id)
         return Response(res)
 
     if request.method == 'PUT':
@@ -152,7 +169,7 @@ def _Answer(id):
             return Response('No id provided')
         if not request.form:
             return Response('No data provided')
-        res = Answers.query.get(id)
+        res = Answer.query.get(id)
         for key in answer_keys:
             if key in request.form:
                 setattr(res, key, request.form[key])
@@ -162,7 +179,7 @@ def _Answer(id):
     if request.method == 'DELETE':
         if not id:
             return Response('Please provide an id')
-        res = Answers.query.get(id)
+        res = Answer.query.get(id)
         db.session.delete(res)
         db.session.commit()
         return Response('Answer deleted sucesfully')
