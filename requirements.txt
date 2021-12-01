@@ -1,7 +1,6 @@
 alabaster==0.7.12
 alembic==1.7.5
 aniso8601==7.0.0
-ariadne==0.13.0
 Babel==2.9.1
 certifi==2021.10.8
 charset-normalizer==2.0.7
@@ -31,6 +30,7 @@ packaging==21.3
 promise==2.3
 Pygments==2.10.0
 pyparsing==3.0.6
+python-Levenshtein==0.12.2
 pytz==2021.3
 requests==2.26.0
 Rx==1.6.1
@@ -47,7 +47,7 @@ sphinxcontrib-serializinghtml==1.1.5
 SQLAlchemy==1.4.27
 starlette==0.14.2
 thefuzz==0.19.0
-typing-extensions==4.0.0
+typing_extensions==4.0.0
 urllib3==1.26.7
 Werkzeug==2.0.2
 WTForms==3.0.0
