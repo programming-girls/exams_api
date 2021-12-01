@@ -183,3 +183,25 @@ DELETE sub_question?id=2
 ```
 
 
+# Marking Scheme
+
+Primary School: 
+
+Choice Question Marking Scheme
+
+Choice selected by pupil is compared the the correct answer linked the the question in the db, and if correct, score ir provided else, score is 0
+
+Secondary School:
+
+Text Marking Scheme
+
+Because student cannot write exactly what the marking scheme provides, a matching algorithm is used to do a string match.
+
+It uses [Levenshtein Distance](https://en.wikipedia.org/wiki/Levenshtein_distance) to calculate the differences between sequences in a simple-to-use package
+
+### Example:
+
+"fuzzy was a bear", "fuzzy fuzzy was a bear"
+Score: 84
+
+

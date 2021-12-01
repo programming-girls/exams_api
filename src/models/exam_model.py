@@ -33,7 +33,7 @@ class Exam(db.Model):
     exam_hash = db.Column(db.String(), nullable=False, unique=True)
 
     def __repr__(self):
-        return "<Exam ID: {}>".format(self.id)
+        return "<Exam: {}, {}, {}, {}>".format(self.id, self.title, self.year, self.exam_hash)
 
 class Subject(db.Model):
     __tablename__ = 'subject'

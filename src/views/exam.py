@@ -1,6 +1,7 @@
+import json
 import hashlib
 from manage import db
-from flask import Blueprint, Response, request
+from flask import Blueprint, Response, request, jsonify
 from src.models.exam_model import Exam, Question, Answer, Image, SubQuestion  
 
 exam = Blueprint('exam', __name__)
@@ -27,6 +28,7 @@ def _Exam():
         if not year:
             return Response(status=400, response='year is required')
         string= title.lower() + year
+
         hash_object = hashlib.md5(string.encode())
 
         res = Exam.query.filter_by(exam_hash=hash_object.hexdigest()).first()
@@ -43,8 +45,13 @@ def _Exam():
         id = request.args.get('id')
         if not id:
             res = Exam.query.all()
-        res = Exam.query.get(id).first()
-        return Response(res)
+            for exam in res:
+                return Response(status=200, mimetype='application/json', response=exam)
+
+        res = Exam.query.filter_by(id=id).first()
+        if not res:
+            return Response(status=404, response='Exam not found')
+        return Response(status=200, mimetype='application/json', response=res)
 
     if request.method == 'PUT':
         id = request.args.get('id')
@@ -54,8 +61,9 @@ def _Exam():
             return Response('No data provided')
         res = Exam.query.get(id)
         for key in exam_keys:
-            if key in request.form:
-                setattr(res, key, request.form[key])
+            if key in request.json:
+                setattr(res, key, request.json[key])
+        # todo: update exam_hash on update
         db.session.commit()
         return Response('Exam title updated sucesfully')
         
@@ -90,7 +98,11 @@ def _Images():
         id = request.args.get('id')
         if not id:
             res = Image.query.all()
+            for image in res:
+                return Response(status=200, mimetype='application/json', response=image)
         res = Image.query.get(id)
+        if not res:
+            return Response(status=404, response='Image not found')
         return Response(res)
 
     if request.method == 'PUT':
@@ -147,8 +159,12 @@ def _Questions():
         id = request.args.get('id')
         if not id:
             res = Question.query.all()
+            for question in res:
+                return Response(status=200, mimetype='application/json', response=question)
         res = Question.query.get(id)
-        return Response(res)
+        if not res:
+            return Response(status=404, response='Question not found')
+        return Response(status=200, mimetype='application/json', response=res)
 
     if request.method == 'PUT':
         id = request.args.get('id')
@@ -191,7 +207,7 @@ def _Answer():
 
         if not question_id:
             return Response(status=400, response='Question id is required')
-            
+
         ans = Answer(ans=ans, question=question_id)
         db.session.add(ans)
         db.session.commit()
@@ -201,8 +217,12 @@ def _Answer():
         id = request.args.get('id')
         if not id:
             res = Answer.query.all()
+            for answer in res:
+                return Response(status=200, mimetype='application/json', response=answer)
         res = Answer.query.get(id)
-        return Response(res)
+        if not res:
+            return Response(status=404, response='Answer not found')
+        return Response(status=200, mimetype='application/json', response=res)
 
     if request.method == 'PUT':
         id = request.args.get('id')
@@ -256,7 +276,11 @@ def _Subquestion(id=None):
     if request.method == 'GET':
         if not id:
             res = SubQuestion.query.all()
+            for sub_question in res:
+                return Response(status=200, mimetype='application/json', response=sub_question)
         res = SubQuestion.query.get(id)
+        if not res:
+            return Response(status=404, response='Sub_Question not found')
         return Response(res)
 
     if request.method == 'PUT':
