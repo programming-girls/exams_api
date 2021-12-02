@@ -12,6 +12,10 @@ question_keys = ['question', 'ques_score', 'image_id']
 answer_keys = ['ans','ques_id']
 sub_question_keys = ['sub_question', 'sub_ques_score', 'sub_ques_ans_id']
 
+def hash_exam_title(string):
+    hash = hashlib.md5(string.encode())
+    return hash.hexdigest()
+
 @exam.route('/title', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def _Exam():
     if request.method == 'POST':
@@ -29,13 +33,13 @@ def _Exam():
             return Response(status=400, response='year is required')
         string= title.lower() + year
 
-        hash_object = hashlib.md5(string.encode())
+        hash_object = hash_exam_title(string)
 
-        res = Exam.query.filter_by(exam_hash=hash_object.hexdigest()).first()
+        res = Exam.query.filter_by(exam_hash=hash_object).first()
         if res:
             return Response(status=400, response='Exam already exists')
 
-        exam = Exam( title=title, year=year, exam_hash=hash_object.hexdigest())
+        exam = Exam( title=title, year=year, exam_hash=hash_object)
         db.session.add(exam)
         db.session.commit()
         return Response(status=201, mimetype='application/json')
@@ -60,8 +64,12 @@ def _Exam():
         if not request.json:
             return Response('No data provided')
         res = Exam.query.get(id)
+        if not res:
+            return Response('Exam not found', status=404)
+
         for key in exam_keys:
             if key in request.json:
+
                 setattr(res, key, request.json[key])
         # todo: update exam_hash on update
         db.session.commit()
