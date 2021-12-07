@@ -1,4 +1,3 @@
-import json
 import hashlib
 from manage import db
 from flask import Blueprint, Response, request, jsonify
