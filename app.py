@@ -18,7 +18,6 @@ with application.app_context():
 
 @application.route('/')
 def hello():
-    division_by_zero = 1 / 0
     return "Hello World!"
 
 
