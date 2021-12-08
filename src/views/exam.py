@@ -11,6 +11,10 @@ question_keys = ['question', 'ques_score', 'image_id']
 answer_keys = ['ans','ques_id']
 sub_question_keys = ['sub_question', 'sub_ques_score', 'sub_ques_ans_id']
 
+@exam.route('/exam', methods=['GET'])
+def health():
+    return Response(status=200, mimetype='application/json', response=jsonify({'message': 'Exam API is up and running'}))
+
 def hash_exam_title(string):
     hash = hashlib.md5(string.encode())
     return hash.hexdigest()
