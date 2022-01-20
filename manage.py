@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 application = Flask(__name__)
-application.config[''] = 'student-db.ciols0dbtsyc.us-east-2.rds.amazonaws.com'
+application.config[''] = ''
 application.config[''] = ''
 application.config[''] = ''
 application.config[''] = ''
