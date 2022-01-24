@@ -35,6 +35,14 @@ class Exam(db.Model):
     def __repr__(self):
         return "<Exam: {}, {}, {}, {}>".format(self.id, self.title, self.year, self.exam_hash)
 
+    def serialize(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'year': self.year,
+            'exam_hash': self.exam_hash
+        }
+
 class Subject(db.Model):
     __tablename__ = 'subject'
     id = db.Column(db.Integer, primary_key=True)
@@ -45,6 +53,13 @@ class Subject(db.Model):
     def __repr__(self):
         return "<Subject ID: {}>".format(self.id)
 
+    def serialize(self):
+        return {
+            'id': self.id,
+            'subject_topic': self.subject_topic,
+            'sub_topic': self.sub_topic
+        }
+
 class Question(db.Model):
     __tablename__ = 'question'
     id = db.Column(db.Integer, primary_key=True)
@@ -54,6 +69,13 @@ class Question(db.Model):
 
     def __repr__(self):
             return "<Question ID: {}>".format(self.id)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'ques': self.ques,
+            'ques_score': self.ques_score
+        }
 
 class SubQuestion(db.Model):
     __tablename__ = 'subquestion'
@@ -66,6 +88,14 @@ class SubQuestion(db.Model):
     def __repr__(self):
         return "<SubQuestion ID: {}>".format(self.id)
 
+    def serialize(self):
+        return {
+            'id': self.id,
+            'subques': self.subques,
+            'subques_score': self.subques_score,
+            'sub_ques_ans_id': self.sub_ques_ans_id
+        }
+
 class Answer(db.Model):
     __tablename__ = 'answer'
     id = db.Column(db.Integer, primary_key=True)
@@ -74,6 +104,12 @@ class Answer(db.Model):
 
     def __repr__(self):
         return "<Answer ID: {}>".format(self.id)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'ans': self.ans
+        }
 
 class Image(db.Model):
     __tablename__ = 'image'
@@ -84,4 +120,11 @@ class Image(db.Model):
 
     def __repr__(self):
         return "<Image ID: {}>".format(self.id)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'images_url': self.images_url,
+            'image_caption': self.image_caption
+        }
 

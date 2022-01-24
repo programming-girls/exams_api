@@ -1,7 +1,8 @@
+import json
 import hashlib
 from manage import db
-from flask import Blueprint, Response, request, jsonify
-from src.models.exam_model import Exam, Question, Answer, Image, SubQuestion  
+from flask import Blueprint, Response, request, jsonify, make_response
+from src.models.exam_model import Exam, Question, Answer, Image, SubQuestion, Subject  
 
 exam = Blueprint('exam', __name__)
 
@@ -10,10 +11,11 @@ image_keys = ['image_url', 'image_caption']
 question_keys = ['question', 'ques_score', 'image_id']
 answer_keys = ['ans','ques_id']
 sub_question_keys = ['sub_question', 'sub_ques_score', 'sub_ques_ans_id']
+subject_keys = ['subject_topic', 'sub_topic']
 
 @exam.route('/exam', methods=['GET'])
 def health():
-    return Response(status=200, mimetype='application/json', response=jsonify({'message': 'Exam API is up and running'}))
+    return Response(status=200, mimetype='application/json', response='Exam API is up and running')
 
 def hash_exam_title(string):
     hash = hashlib.md5(string.encode())
@@ -27,14 +29,16 @@ def _Exam():
         but never duplicates, even if it is in lowercase
         '''
         if not request.json:
-            return Response(status=400)
+            return Response(status=400, mimetype='application/json', response='No JSON data provided')
+
         title = request.json.get('title')
         if not title:
             return Response(status=400, response='Title is required')
         year = request.json.get('year')
         if not year:
             return Response(status=400, response='year is required')
-        string= title.lower() + year
+
+        string= title.lower() + str(year)
 
         hash_object = hash_exam_title(string)
 
@@ -45,20 +49,22 @@ def _Exam():
         exam = Exam( title=title, year=year, exam_hash=hash_object)
         db.session.add(exam)
         db.session.commit()
-        return Response(status=201, mimetype='application/json')
+        return Response(status=201, mimetype='application/json', response='Exam created successfully')
     
 
     if request.method == 'GET':
         id = request.args.get('id')
+        r = list()
         if not id:
             res = Exam.query.all()
             for exam in res:
-                return Response(status=200, mimetype='application/json', response=exam)
+                r.append(exam.serialize())    
+            return make_response(jsonify(r), 200)        
 
         res = Exam.query.filter_by(id=id).first()
         if not res:
             return Response(status=404, response='Exam not found')
-        return Response(status=200, mimetype='application/json', response=res)
+        return make_response(jsonify(res.serialize()), 200)
 
     if request.method == 'PUT':
         id = request.args.get('id')
@@ -87,8 +93,70 @@ def _Exam():
         db.session.commit()
         return Response('Exam title deleted sucesfully')
 
+@exam.route('/subject', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def _Subject():
+    if request.method == 'POST':
+        if not request.json:
+            return Response(status=400, mimetype='application/json', response='No JSON data provided')
+        if not request.json.get('exam_id'):
+            return Response(status=400, response='Exam id is required')
+        if not request.json.get('subject_topic'):
+            return Response(status=400, response='Subject is required')
+        if not request.json.get('sub_topic'):
+            return Response(status=400, response='Sub Topic is required')
+        exam_id = request.json.get('exam_id')
+        subject_topic = request.json.get('subject')
+        sub_topic = request.json.get('sub_topic')
+        res = Exam.query.filter_by(id=exam_id).first()
+        if not res:
+            return Response(status=404, response='Exam not found')
+
+        subject = Subject(subject_topic=subject_topic, sub_topic=sub_topic, exam=exam_id)
+        db.session.add(subject)
+        db.session.commit()
+        return Response(status=201, mimetype='application/json', response='Subject updated sucesfully')
+
+    if request.method == 'GET':
+        id = request.args.get('id')
+        r = list()
+        if not id:
+            res = Subject.query.all()
+            for subject in res:
+                r.append(subject.serialize())    
+            return make_response(jsonify(r), 200)        
+
+        res = Subject.query.filter_by(id=id).first()
+        if not res:
+            return Response(status=404, response='Subject not found')
+        return make_response(jsonify(res.serialize()), 200)
+    if request.method == 'PUT':
+        id = request.args.get('id')
+        if not id:
+            return Response('No id provided')
+        if not request.json:
+            return Response('No data provided')
+        res = Subject.query.get(id)
+        if not res:
+            return Response('Subject not found', status=404)
+
+        for key in subject_keys:
+            if key in request.json:
+                setattr(res, key, request.json[key])
+        db.session.commit()
+    if request.method == 'DELETE':
+        id = request.args.get('id')
+        if not id:
+            return Response('Please provide an id')
+        res = Subject.query.get(id)
+        if not res:
+            return Response('Subject not found', status=404)
+        db.session.delete(res)
+        db.session.commit()
+        return Response('Subject deleted sucesfully')
+
 @exam.route('/search', methods=['GET'])
 def _Search():
+    # todo: implement search with elastic search
     if not request.args:
         return Response('No data provided')
     res = Exam.query.filter_by(**request.args).all()
@@ -313,6 +381,8 @@ def _Subquestion(id=None):
         db.session.delete(res)
         db.session.commit()
         return Response('Sub_Question deleted sucesfully')
+
+
     
 
 

@@ -3,7 +3,7 @@
 
 ## What is it?
 
-A graphql api for CRUD of exam + Scoring
+A REST api for CRUD of exam + Scoring
 
 ## Installation
 
@@ -26,6 +26,7 @@ Perform migrations
 ```
 python manage.py makemigrations
 python manage.py migrate
+python populate_db.py
 ```
 
 Testing
